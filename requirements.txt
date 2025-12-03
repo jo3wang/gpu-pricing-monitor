@@ -1,0 +1,17 @@
+# Core data collection and processing
+requests>=2.31.0
+pandas>=2.0.0
+numpy>=1.21.0
+boto3>=1.28.0
+
+# Visualization and analysis 
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Dashboard and interactive visualization
+streamlit>=1.28.0
+plotly>=5.15.0
+
+# Additional utilities
+pathlib2>=2.3.0  # For older Python compatibility
+
