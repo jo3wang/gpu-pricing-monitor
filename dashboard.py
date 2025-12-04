@@ -104,31 +104,37 @@ def calculate_price_change(df: pd.DataFrame, cloud: str, model: str) -> tuple:
     """Calculate price change percentage for a cloud/model."""
     cloud_data = df[(df['cloud'] == cloud) & (df['accelerator_model'] == model) & (df['region'] == 'ALL')]
 
-    if cloud_data.empty or len(cloud_data) < 2:
+    if cloud_data.empty:
         return None, None
 
     cloud_data = cloud_data.sort_values('date')
+
+    # Get latest price
     latest = cloud_data.iloc[-1]['median_price_per_accel_hour_ondemand']
+
+    # Calculate change only if we have at least 2 data points
+    if len(cloud_data) < 2:
+        return latest, None
+
     previous = cloud_data.iloc[-2]['median_price_per_accel_hour_ondemand']
 
     if pd.isna(latest) or pd.isna(previous) or previous == 0:
-        return None, None
+        return latest if not pd.isna(latest) else None, None
 
     change_pct = ((latest - previous) / previous) * 100
     return latest, change_pct
 
 
-def create_pricing_card(cloud_name: str, price: float, change_pct: float, icon: str):
+def create_pricing_card(cloud_name: str, price: float, change_pct: float, icon: str, pricing_type: str):
     """Create a pricing metric card."""
     if price is None:
         price_display = "N/A"
+        subtitle = ""
         change_display = ""
     else:
-        # Convert to thousands for display
-        if price > 1000:
-            price_display = f"{price/1000:.1f}K"
-        else:
-            price_display = f"{price:.0f}"
+        # Format price with $ and /hr
+        price_display = f"${price:.2f}/hr"
+        subtitle = f'<div style="font-size: 11px; color: #64748b; margin-top: 4px;">Median {pricing_type}</div>'
 
         if change_pct is not None:
             change_class = "change-up" if change_pct >= 0 else "change-down"
@@ -141,6 +147,7 @@ def create_pricing_card(cloud_name: str, price: float, change_pct: float, icon: 
     <div class="metric-card">
         <div class="metric-label">{icon} {cloud_name}</div>
         <div class="metric-value">{price_display}</div>
+        {subtitle}
         {change_display}
     </div>
     """
@@ -192,14 +199,17 @@ def main():
     azure_price, azure_change = calculate_price_change(df, 'azure', selected_model)
     gcp_price, gcp_change = calculate_price_change(df, 'gcp', selected_model)
 
+    # Determine pricing type label
+    pricing_label = "Spot Price" if pricing_type == "Spot Pricing" else "On-Demand Price"
+
     with col1:
-        st.markdown(create_pricing_card("AWS", aws_price, aws_change, "☁️"), unsafe_allow_html=True)
+        st.markdown(create_pricing_card("AWS", aws_price, aws_change, "☁️", pricing_label), unsafe_allow_html=True)
 
     with col2:
-        st.markdown(create_pricing_card("Azure", azure_price, azure_change, "👤"), unsafe_allow_html=True)
+        st.markdown(create_pricing_card("Azure", azure_price, azure_change, "👤", pricing_label), unsafe_allow_html=True)
 
     with col3:
-        st.markdown(create_pricing_card("GCP", gcp_price, gcp_change, "➕"), unsafe_allow_html=True)
+        st.markdown(create_pricing_card("GCP", gcp_price, gcp_change, "➕", pricing_label), unsafe_allow_html=True)
 
     # Main chart section
     st.markdown("<br>", unsafe_allow_html=True)
@@ -224,6 +234,12 @@ def main():
 
     # Remove rows with missing pricing data
     df_chart = df_chart[df_chart[price_col].notna()]
+
+    # Check if we have any data after filtering
+    if df_chart.empty:
+        st.warning(f"No spot pricing data available for {selected_model}")
+        st.info("Spot pricing data is only available for AWS GPU instances with manual data collection.")
+        st.stop()
 
     # Create the main chart
     fig = go.Figure()
