@@ -14,7 +14,7 @@ from datetime import datetime
 # Page configuration with dark theme
 st.set_page_config(
     page_title="GPU Pricing Monitor",
-    page_icon="💰",
+    page_icon="$",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -83,7 +83,7 @@ def load_pricing_data(data_dir: Path) -> pd.DataFrame:
     summary_path = data_dir / 'gpu_pricing_summary.csv'
 
     if not summary_path.exists():
-        st.error(f"⚠️ Data file not found: {summary_path}")
+        st.error(f"Data file not found: {summary_path}")
         st.info("Run data collection first: `python3 collect_daily_prices.py`")
         return pd.DataFrame()
 
@@ -170,7 +170,7 @@ def main():
         st.stop()
 
     # Sidebar for model selection
-    st.sidebar.header("⚙️ Settings")
+    st.sidebar.header("Settings")
 
     # GPU model selection
     available_models = sorted(df[df['accelerator_type'] == 'GPU']['accelerator_model'].unique())
@@ -358,7 +358,7 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
 
     # Data summary table
-    with st.expander("📊 View Data Table"):
+    with st.expander("View Data Table"):
         display_df = df_chart[['date', 'cloud', 'accelerator_model', price_col]].sort_values(['cloud', 'date'])
         display_df['date'] = display_df['date'].dt.strftime('%Y-%m-%d')
         display_df[price_col] = display_df[price_col].apply(lambda x: f"${x:.2f}")

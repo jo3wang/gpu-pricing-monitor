@@ -2,7 +2,7 @@
 
 A production-ready pipeline for monitoring GPU and TPU pricing across AWS, Azure, and GCP with automated data cleaning, outlier removal, and interactive dashboards.
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────┐
@@ -35,7 +35,7 @@ A production-ready pipeline for monitoring GPU and TPU pricing across AWS, Azure
 └─────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 ```bash
@@ -62,7 +62,7 @@ python analyze_gpu_prices.py
 streamlit run dashboard.py
 ```
 
-## 📊 Data Pipeline Features
+## Data Pipeline Features
 
 ### Data Collection
 - **AWS**: Multi-region GPU pricing with caching (400MB+ pricing files)
@@ -79,7 +79,7 @@ streamlit run dashboard.py
 - **GPUs**: H100, A100, V100, T4, A10G, L4, P100, K80, M60
 - **TPUs**: TPUv2, TPUv3, TPUv4, TPUv5e, TPUv5p
 
-## 📁 Output Files
+## Output Files
 
 ### Raw Data
 ```
@@ -93,7 +93,7 @@ data/gcp_accel_prices_YYYY-MM-DD.csv    # GCP pricing
 data/gpu_pricing_summary.csv            # Unified time-series summary
 ```
 
-## 🤖 Daily Automation
+## Daily Automation
 
 ```bash
 #!/bin/bash
